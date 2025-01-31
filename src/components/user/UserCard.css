@@ -1,0 +1,53 @@
+/* styles/UserCard.css */
+.user-card {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.user-card img {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.user-card h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.user-card p {
+    margin: 5px 0;
+    color: #777;
+}
+
+.user-card a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.user-card a:hover {
+    color: #0056b3;
+}
+
+/* Hover effect for user card */
+.user-card:active {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
