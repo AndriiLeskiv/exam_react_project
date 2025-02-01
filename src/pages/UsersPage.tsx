@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../redux/store.ts";
 import {fetchUsers, setPage} from "../redux/slices/userSlice.ts";
 import {UserCard} from "../components/user/UserCard.tsx";
@@ -9,9 +9,7 @@ export const UsersPage = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const location = useLocation();
-    const { users, total, currentPage, loading } = useSelector((state: RootState) => state.user);
-
-    console.log('users', users);
+    const {users, total, currentPage, loading} = useSelector((state: RootState) => state.user);
 
     const queryParams = new URLSearchParams(location.search);
     const pageFromUrl = queryParams.get("page");
@@ -21,8 +19,11 @@ export const UsersPage = () => {
         if (page !== currentPage) {
             dispatch(setPage(page));
         }
-        dispatch(fetchUsers({ page }));
     }, [dispatch, page, currentPage]);
+
+    useEffect(() => {
+        dispatch(fetchUsers({ page }));
+    }, [dispatch, page]);
 
     const totalPages = Math.ceil(total / 30);
 
@@ -49,7 +50,14 @@ export const UsersPage = () => {
             </ul>
 
             <div className="pagination-container">
-                {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                    Попередня
+                </button>
+
+                {Array.from({length: totalPages}, (_, index) => (
                     <button
                         key={index + 1}
                         onClick={() => handlePageChange(index + 1)}
@@ -59,6 +67,13 @@ export const UsersPage = () => {
                         {index + 1}
                     </button>
                 ))}
+
+                <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    Наступна
+                </button>
             </div>
         </div>
     );

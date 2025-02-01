@@ -11,18 +11,13 @@ export const UserCard: React.FC<UserCardProps> = ({ user }) => {
     return (
         <div className="user-card">
             <img src={user.image} alt={user.firstName} width="50" />
-            <Link to={`/users/id=${user.id}`}>
+            <Link to={`/users/${user.id}`}>
                 <h3>{user.firstName} {user.lastName}</h3>
             </Link>
             <p>Email: {user.email}</p>
             <p>Телефон: {user.phone}</p>
             <p>Стать: {user.gender}</p>
             <p>Дата народження: {user.birthDate}</p>
-            <p>Місто: {user.university}</p>
-            <p>Країна: {user.eyeColor}</p>
-            <p>Статус: {user.age}</p>
-            <p>Роль: {user.role}</p>
-            <p>Зареєстровано: {user.ip}</p>
         </div>
     );
 };

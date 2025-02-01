@@ -13,9 +13,9 @@ export const routes = createBrowserRouter([
             {index: true, element: <HomePage/>},
             {path: "login", element: <AuthPage/>},
             {path: "users", element: <UsersPage/>},
-            {path: "users:userId", element: <UserDetailPage/>},
+            {path: "/users/:id", element: <UserDetailPage/>},
             {path: "recipes", element: <RecipesPage/>},
-            {path: "recipes:recipeId", element: <RecipeDetailPage/>}
+            {path: "recipes/:id", element: <RecipeDetailPage/>}
         ]
     }
 ]);

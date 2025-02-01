@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
 import {IUser} from "../../models/user/IUser.ts";
+import {getUserByIdApi, getUsersApi} from "../../services/api.service.ts";
 
 interface UserState {
     firstName: string;
@@ -10,6 +11,7 @@ interface UserState {
     users: IUser[];
     total: number;
     currentPage: number;
+    user: IUser | null;
 }
 
 const initialState: UserState = {
@@ -20,6 +22,7 @@ const initialState: UserState = {
     users: [],
     total: 0,
     currentPage: 1,
+    user: null,
 };
 
 const axiosInstance = axios.create({
@@ -35,15 +38,8 @@ export const fetchUsers = createAsyncThunk<
     "user/fetchUsers",
     async ({ page }, { rejectWithValue }) => {
         try {
-            const limit = 30;
-            const skip = (page - 1) * limit;
-
-            const response = await axiosInstance.get(`/users?limit=${limit}&skip=${skip}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                },
-            });
-            return { users: response.data.users, total: response.data.total };
+            const data = await getUsersApi(page);
+            return { users: data.users, total: data.total };
         } catch (error) {
             console.log(error);
             return rejectWithValue("Не вдалося отримати список користувачів");
@@ -51,17 +47,16 @@ export const fetchUsers = createAsyncThunk<
     }
 );
 
-
 export const fetchUser = createAsyncThunk<IUser, void, { rejectValue: string }>(
     "user/fetchUser",
-    async (_, { getState, rejectWithValue }) => {
+    async (_, {getState, rejectWithValue}) => {
         try {
             const state = getState() as { auth: { accessToken: string | null } };
             if (!state.auth.accessToken) {
                 return rejectWithValue("Користувач не авторизований");
             }
             const response = await axiosInstance.get("/me", {
-                headers: { Authorization: `Bearer ${state.auth.accessToken}` },
+                headers: {Authorization: `Bearer ${state.auth.accessToken}`},
             });
             return response.data;
         } catch (error) {
@@ -70,6 +65,10 @@ export const fetchUser = createAsyncThunk<IUser, void, { rejectValue: string }>(
         }
     }
 );
+
+export const fetchUserById = createAsyncThunk("user/fetchUserById", async (id: number) => {
+    return await getUserByIdApi(id);
+});
 
 const userSlice = createSlice({
     name: "user",
@@ -106,9 +105,21 @@ const userSlice = createSlice({
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
+            })
+            .addCase(fetchUserById.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchUserById.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.loading = false;
+            })
+            .addCase(fetchUserById.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || "Помилка отримання даних";
             });
     },
 });
 
-export const { setPage } = userSlice.actions;
+export const {setPage} = userSlice.actions;
 export default userSlice.reducer;
