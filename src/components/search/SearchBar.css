@@ -1,0 +1,29 @@
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    width: 200px;
+    padding: 5px;
+}
+
+.search-bar button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.search-results {
+    list-style: none;
+    padding: 0;
+}
+
+.search-results li {
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.error {
+    color: red;
+}

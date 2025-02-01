@@ -5,6 +5,7 @@ import {UserCard} from "../components/user/UserCard.tsx";
 import {useLocation, useNavigate} from "react-router";
 import {useEffect} from "react";
 import {Pagination} from "../components/pagination/Pagination.tsx";
+import {SearchBar} from "../components/search/SearchBar.tsx";
 
 export const UsersPage = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -36,6 +37,7 @@ export const UsersPage = () => {
     return (
         <div>
             <h1>Список користувачів</h1>
+            <SearchBar searchType="users" />
             <ul>
                 {loading ? (
                     <p>Завантаження...</p>

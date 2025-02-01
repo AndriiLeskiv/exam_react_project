@@ -1,7 +1,6 @@
 import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
-import axios from "axios";
 import {IUser} from "../../models/user/IUser.ts";
-import {getUserByIdApi, getUsersApi} from "../../services/api.service.ts";
+import {fetchUserData, getUserByIdApi, getUsersApi} from "../../services/api.service.ts";
 
 interface UserState {
     firstName: string;
@@ -27,11 +26,6 @@ const initialState: UserState = {
     selectedUser: null,
 };
 
-const axiosInstance = axios.create({
-    baseURL: "https://dummyjson.com/auth",
-    headers: {}
-});
-
 export const fetchUsers = createAsyncThunk<
     { users: IUser[]; total: number },
     { page: number },
@@ -51,18 +45,20 @@ export const fetchUsers = createAsyncThunk<
 
 export const fetchUser = createAsyncThunk<IUser, void, { rejectValue: string }>(
     "user/fetchUser",
-    async (_, {getState, rejectWithValue}) => {
+    async (_, { getState, rejectWithValue }) => {
+        const state = getState() as { auth: { accessToken: string | null } };
+        const accessToken = state.auth.accessToken;
+
+        if (!accessToken) {
+            return rejectWithValue("Користувач не авторизований");
+        }
+
         try {
-            const state = getState() as { auth: { accessToken: string | null } };
-            if (!state.auth.accessToken) {
-                return rejectWithValue("Користувач не авторизований");
-            }
-            const response = await axiosInstance.get("/me", {
-                headers: {Authorization: `Bearer ${state.auth.accessToken}`},
-            });
-            return response.data;
+            const user = await fetchUserData(accessToken);
+            console.log('user', user);
+            return user;
         } catch (error) {
-            console.log(error);
+            console.error("Error in fetchUser:", error);
             return rejectWithValue("Не вдалося отримати дані користувача");
         }
     }

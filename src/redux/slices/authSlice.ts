@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {loginApi, refreshTokenApi, logoutApi} from "../../services/api.service";
+import {loginApi, logoutApi} from "../../services/api.service";
 import { retrieveLocalStorage } from "../../services/helpers.ts";
 import {IUser} from "../../models/user/IUser.ts";
 
@@ -51,32 +51,6 @@ export const login = createAsyncThunk(
     }
 );
 
-// AsyncThunk для оновлення токенів
-export const refreshToken = createAsyncThunk(
-    "auth/refreshToken",
-    async (_, { getState, rejectWithValue }) => {
-        try {
-            const state = getState() as { auth: AuthState };
-            if (!state.auth.refreshToken) {
-                return rejectWithValue("Refresh token не знайдено");
-            }
-
-            const data = await refreshTokenApi(state.auth.refreshToken);
-
-            localStorage.setItem("accessToken", data.accessToken);
-            localStorage.setItem("refreshToken", data.refreshToken);
-
-            return {
-                accessToken: data.accessToken,
-                refreshToken: data.refreshToken,
-            };
-        } catch (error) {
-            console.log(error);
-            return rejectWithValue("Не вдалося оновити токен");
-        }
-    }
-);
-
 // AsyncThunk для виходу
 export const logout = createAsyncThunk("auth/logout", async () => {
     await logoutApi();
@@ -103,20 +77,6 @@ const authSlice = createSlice({
             .addCase(login.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-            })
-            .addCase(refreshToken.fulfilled, (state, action) => {
-                state.accessToken = action.payload.accessToken;
-                state.refreshToken = action.payload.refreshToken;
-                localStorage.setItem("accessToken", action.payload.accessToken);
-                localStorage.setItem("refreshToken", action.payload.refreshToken);
-            })
-            .addCase(refreshToken.rejected, (state, action) => {
-                state.error = action.payload as string;
-                state.isAuthenticated = false;
-                state.accessToken = null;
-                state.refreshToken = null;
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
             })
             .addCase(logout.fulfilled, (state) => {
                 state.accessToken = null;

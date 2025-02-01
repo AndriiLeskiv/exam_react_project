@@ -1,22 +1,19 @@
-import axios from "axios";
-import {IUserToken} from "../models/IUserToken";
+import {IUserToken} from "../models/IUserToken.ts";
 import {IRecipes} from "../models/recipes/IRecipes.ts";
+import axiosInstance from "./axiosInstance.ts";
+import {IUser} from "../models/user/IUser.ts";
 
-// Створюємо екземпляр axios для запитів
-const axiosInstance = axios.create({
-    baseURL: "https://dummyjson.com/auth",
-    headers: {}
-});
-
+// // Створюємо екземпляр axios для запитів
+// const axiosInstance = axios.create({
+//     baseURL: "https://dummyjson.com/auth",
+//     headers: {}
+// });
+if (!axiosInstance) {
+    throw new Error("axiosInstance is not properly imported");
+}
 // Функція login
 export const loginApi = async (username: string, password: string): Promise<IUserToken> => {
     const {data} = await axiosInstance.post("/login", {username, password});
-    return data;
-};
-
-// Функція для оновлення токенів
-export const refreshTokenApi = async (refreshToken: string): Promise<IUserToken> => {
-    const {data} = await axiosInstance.post("/refresh", {refreshToken});
     return data;
 };
 
@@ -58,7 +55,10 @@ export const getUserByIdApi = async (id: number) => {
     }
 };
 
-export const getAllRecipesApi = async (page: number, limit: number): Promise<{ recipes: IRecipes[], total: number }> => {
+export const getAllRecipesApi = async (page: number, limit: number): Promise<{
+    recipes: IRecipes[],
+    total: number
+}> => {
     try {
         const skip = (page - 1) * limit;
         const response = await axiosInstance.get(`/recipes?limit=${limit}&skip=${skip}`, {
@@ -106,5 +106,38 @@ export const getRecipesByTagApi = async (tag: string): Promise<{ recipes: IRecip
     } catch (error) {
         console.log(error);
         throw new Error(`Не вдалося отримати рецепти з тегом: ${tag}`);
+    }
+};
+
+export const fetchUserData = async (accessToken: string): Promise<IUser> => {
+    try {
+        const response = await axiosInstance.get("/me", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        throw new Error("Не вдалося отримати дані користувача");
+    }
+};
+
+// Асинхронна дія для пошуку
+export const searchItemsApi = async ({ query, type }: { query: string, type: "recipes" | "users" }) => {
+    try {
+        const response = await axiosInstance.get(`${type}/search?q=${query}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+
+        if (type === "recipes") {
+            return response.data.recipes;
+        } else if (type === "users") {
+            return response.data.users;
+        }
+        return [];
+    } catch (error) {
+        console.error(error);
+        throw new Error("Пошук не дав результату");
     }
 };

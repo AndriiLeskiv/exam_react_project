@@ -5,6 +5,7 @@ import {fetchRecipes, fetchRecipesByTag} from "../redux/slices/recipeSlice";
 import {useLocation, useNavigate} from "react-router";
 import {RecipeList} from "../components/recipe/RecipeList.tsx";
 import {Pagination} from "../components/pagination/Pagination.tsx";
+import {SearchBar} from "../components/search/SearchBar.tsx";
 
 export const RecipesPage = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -55,6 +56,7 @@ export const RecipesPage = () => {
     return (
         <div>
             <h1>Список рецептів</h1>
+            <SearchBar searchType="recipes" />
             <ul className="recipe-list">
                 {recipes.map((recipe) => (
                     <li key={recipe.id} className="recipe-item">
