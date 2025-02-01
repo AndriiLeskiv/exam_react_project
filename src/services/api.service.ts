@@ -1,16 +1,26 @@
+import axiosInstance from "./axiosInstance.ts";
 import {IUserToken} from "../models/IUserToken.ts";
 import {IRecipes} from "../models/recipes/IRecipes.ts";
-import axiosInstance from "./axiosInstance.ts";
 import {IUser} from "../models/user/IUser.ts";
+import {clearAuthData, retrieveLocalStorage} from "./helpers.ts";
 
-// // Створюємо екземпляр axios для запитів
-// const axiosInstance = axios.create({
-//     baseURL: "https://dummyjson.com/auth",
-//     headers: {}
-// });
-if (!axiosInstance) {
-    throw new Error("axiosInstance is not properly imported");
-}
+// Загальна функція для GET запитів
+const fetchData = async (endpoint: string, params: Record<string, any> = {}): Promise<any> => {
+    try {
+        const accessToken = retrieveLocalStorage<string>("accessToken");
+        const response = await axiosInstance.get(endpoint, {
+            params,
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error(`Не вдалося отримати дані з ${endpoint}`);
+    }
+};
+
 // Функція login
 export const loginApi = async (username: string, password: string): Promise<IUserToken> => {
     const {data} = await axiosInstance.post("/login", {username, password});
@@ -19,125 +29,44 @@ export const loginApi = async (username: string, password: string): Promise<IUse
 
 // Функція для виходу
 export const logoutApi = async (): Promise<void> => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    clearAuthData()
 };
 
+// Отримання користувачів
 export const getUsersApi = async (page: number) => {
-    try {
-        const limit = 30;
-        const skip = (page - 1) * limit;
-        const response = await axiosInstance.get(`/users?limit=${limit}&skip=${skip}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
-        console.log('getUsersApi', response.data);
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        throw new Error("Не вдалося отримати користувачів");
-    }
+    const limit = 30;
+    const skip = (page - 1) * limit;
+    return fetchData("/users", { limit, skip });
 };
 
-
+// Отримання користувача за ID
 export const getUserByIdApi = async (id: number) => {
-    try {
-        const response = await axiosInstance.get(`/users/${id}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        throw new Error("Не вдалося отримати користувача");
-    }
+    return fetchData(`/users/${id}`);
 };
 
-export const getAllRecipesApi = async (page: number, limit: number): Promise<{
-    recipes: IRecipes[],
-    total: number
-}> => {
-    try {
-        const skip = (page - 1) * limit;
-        const response = await axiosInstance.get(`/recipes?limit=${limit}&skip=${skip}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
-        console.log('getAllRecipesApi', response.data);
-        return {
-            recipes: response.data.recipes,
-            total: response.data.total,
-        };
-    } catch (error) {
-        console.log(error);
-        throw new Error('Не вдалося отримати рецепти');
-    }
+// Отримання рецептів
+export const getAllRecipesApi = async (page: number, limit: number): Promise<{ recipes: IRecipes[], total: number }> => {
+    const skip = (page - 1) * limit;
+    const data = await fetchData("/recipes", { limit, skip });
+    return { recipes: data.recipes, total: data.total };
 };
 
 export const getRecipeByIdApi = async (id: number): Promise<IRecipes> => {
-    try {
-        const response = await axiosInstance.get(`/recipes/${id}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        throw new Error('Не вдалося отримати рецепт');
-    }
+    return fetchData(`/recipes/${id}`);
 };
 
 export const getRecipesByTagApi = async (tag: string): Promise<{ recipes: IRecipes[], total: number }> => {
-    try {
-        const response = await axiosInstance.get(`/recipes/tag/${tag}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
-        console.log('getRecipesByTagApi', response.data);
-        return {
-            recipes: response.data.recipes,
-            total: response.data.total,
-        };
-    } catch (error) {
-        console.log(error);
-        throw new Error(`Не вдалося отримати рецепти з тегом: ${tag}`);
-    }
+    const data = await fetchData(`/recipes/tag/${tag}`);
+    return { recipes: data.recipes, total: data.total };
 };
 
+// Отримання даних користувача
 export const fetchUserData = async (accessToken: string): Promise<IUser> => {
-    try {
-        const response = await axiosInstance.get("/me", {
-            headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching user data:", error);
-        throw new Error("Не вдалося отримати дані користувача");
-    }
+    return fetchData("/me", { accessToken });
 };
 
-// Асинхронна дія для пошуку
+// Пошук елементів
 export const searchItemsApi = async ({ query, type }: { query: string, type: "recipes" | "users" }) => {
-    try {
-        const response = await axiosInstance.get(`${type}/search?q=${query}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
-
-        if (type === "recipes") {
-            return response.data.recipes;
-        } else if (type === "users") {
-            return response.data.users;
-        }
-        return [];
-    } catch (error) {
-        console.error(error);
-        throw new Error("Пошук не дав результату");
-    }
+    const data = await fetchData(`${type}/search`, { q: query });
+    return type === "recipes" ? data.recipes : data.users;
 };

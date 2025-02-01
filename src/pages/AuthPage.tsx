@@ -1,25 +1,28 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/slices/authSlice.ts";
-import { fetchUser } from "../redux/slices/userSlice.ts";
-import { RootState } from "../redux/store.ts";
-import { AppDispatch } from "../redux/store.ts";
+import React, {useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {login} from "../redux/slices/authSlice.ts";
+import {fetchUser} from "../redux/slices/userSlice.ts";
+import {RootState} from "../redux/store.ts";
+import {AppDispatch} from "../redux/store.ts";
+import {useNavigate} from "react-router";
 
 export const AuthPage = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const dispatch = useDispatch<AppDispatch>(); // Типізуємо dispatch як AppDispatch
-    const { loading, error, isAuthenticated } = useSelector(
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
+    const {loading, error, isAuthenticated} = useSelector(
         (state: RootState) => state.auth
     );
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const loginResult = await dispatch(login({ username, password })).unwrap();
-            console.log('loginResult',loginResult)
+            const loginResult = await dispatch(login({username, password})).unwrap();
+            console.log('loginResult', loginResult)
             if (loginResult.accessToken) {
                 await dispatch(fetchUser()).unwrap();
+                navigate('/');
             }
         } catch (err) {
             console.error("Помилка авторизації:", err);
@@ -52,7 +55,7 @@ export const AuthPage = () => {
                     </button>
                 </form>
             )}
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <p style={{color: "red"}}>{error}</p>}
         </div>
     );
 };

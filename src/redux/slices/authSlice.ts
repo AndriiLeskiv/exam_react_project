@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {loginApi, logoutApi} from "../../services/api.service";
-import { retrieveLocalStorage } from "../../services/helpers.ts";
+import {clearAuthData, retrieveLocalStorage, setTokenToStorage} from "../../services/helpers.ts";
 import {IUser} from "../../models/user/IUser.ts";
 
 interface AuthState {
@@ -28,9 +28,8 @@ export const login = createAsyncThunk(
         try {
             const data = await loginApi(username, password);
 
-            localStorage.setItem("accessToken", data.accessToken);
-            localStorage.setItem("refreshToken", data.refreshToken);
-
+            setTokenToStorage("accessToken", data.accessToken);
+            setTokenToStorage("refreshToken", data.refreshToken);
             localStorage.setItem("user", JSON.stringify({
                 firstName: data.firstName,
                 image: data.image,
@@ -82,9 +81,7 @@ const authSlice = createSlice({
                 state.accessToken = null;
                 state.refreshToken = null;
                 state.isAuthenticated = false;
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                localStorage.removeItem("user");
+                clearAuthData();
             })
 
     },

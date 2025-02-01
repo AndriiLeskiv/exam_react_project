@@ -1,11 +1,12 @@
 import axios from "axios";
+import {retrieveLocalStorage, setTokenToStorage} from "./helpers.ts";
 
 const axiosInstance = axios.create({
     baseURL: "https://dummyjson.com/auth"
 });
 
 axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
+    const token = retrieveLocalStorage<string>("accessToken");
     if (token) {
         config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -18,10 +19,9 @@ axiosInstance.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
-
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            const refreshToken = localStorage.getItem("refreshToken");
+            const refreshToken = retrieveLocalStorage<string>("refreshToken");
 
             if (!refreshToken) {
                 return Promise.reject(error);
@@ -34,8 +34,8 @@ axiosInstance.interceptors.response.use(
 
                 const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
 
-                localStorage.setItem("accessToken", newAccessToken);
-                localStorage.setItem("refreshToken", newRefreshToken);
+                setTokenToStorage("accessToken", newAccessToken);
+                setTokenToStorage("refreshToken", newRefreshToken);
 
                 originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
                 return axiosInstance(originalRequest);
@@ -44,7 +44,6 @@ axiosInstance.interceptors.response.use(
                 return Promise.reject(error);
             }
         }
-
         return Promise.reject(error);
     }
 );
