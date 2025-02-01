@@ -76,3 +76,17 @@ export const getAllRecipesApi = async (page: number, limit: number): Promise<{ r
         throw new Error('Не вдалося отримати рецепти');
     }
 };
+
+export const getRecipeByIdApi = async (id: number): Promise<IRecipes> => {
+    try {
+        const response = await axiosInstance.get(`/recipes/${id}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error('Не вдалося отримати рецепт');
+    }
+};

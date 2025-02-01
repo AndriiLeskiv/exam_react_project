@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { IRecipes } from "../../models/recipes/IRecipes";
-import {getAllRecipesApi} from "../../services/api.service.ts";
+import {getAllRecipesApi, getRecipeByIdApi} from "../../services/api.service.ts";
 
 interface RecipesState {
     recipes: IRecipes[];
+    userRecipes: IRecipes[];
     total: number;
     selectedRecipe: IRecipes | null;
     status: "idle" | "loading" | "failed";
@@ -11,6 +12,7 @@ interface RecipesState {
 
 const initialState: RecipesState = {
     recipes: [],
+    userRecipes: [],
     total: 0,
     selectedRecipe: null,
     status: "idle",
@@ -20,6 +22,21 @@ export const fetchRecipes = createAsyncThunk(
     "recipes/fetchRecipes",
     async ({ page, limit }: { page: number, limit: number }) => {
         return await getAllRecipesApi(page, limit);
+    }
+);
+
+export const fetchRecipeById = createAsyncThunk(
+    "recipes/fetchRecipeById",
+    async (id: number) => {
+        return await getRecipeByIdApi(id);
+    }
+);
+
+export const fetchRecipesByUserId = createAsyncThunk(
+    "recipes/fetchRecipesByUserId",
+    async (userId: number) => {
+        const response = await getAllRecipesApi(1, 50);
+        return response.recipes.filter(recipe => recipe.userId === userId);
     }
 );
 
@@ -43,7 +60,21 @@ const recipeSlice = createSlice({
             })
             .addCase(fetchRecipes.rejected, (state) => {
                 state.status = "failed";
-            });
+            })
+            .addCase(fetchRecipeById.pending, (state) => {
+                state.status = "loading";
+            })
+            .addCase(fetchRecipeById.fulfilled, (state, action) => {
+                state.status = "idle";
+                state.selectedRecipe = action.payload;
+            })
+            .addCase(fetchRecipeById.rejected, (state) => {
+                state.status = "failed";
+            })
+            .addCase(fetchRecipesByUserId.fulfilled, (state, action) => {
+                state.status = "idle";
+                state.userRecipes = action.payload;
+            })
     },
 });
 

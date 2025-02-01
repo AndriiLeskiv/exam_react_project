@@ -17,6 +17,7 @@ export const AuthPage = () => {
         e.preventDefault();
         try {
             const loginResult = await dispatch(login({ username, password })).unwrap();
+            console.log('loginResult',loginResult)
             if (loginResult.accessToken) {
                 await dispatch(fetchUser()).unwrap();
             }

@@ -12,6 +12,7 @@ interface UserState {
     total: number;
     currentPage: number;
     user: IUser | null;
+    selectedUser: IUser | null;
 }
 
 const initialState: UserState = {
@@ -23,6 +24,7 @@ const initialState: UserState = {
     total: 0,
     currentPage: 1,
     user: null,
+    selectedUser: null,
 };
 
 const axiosInstance = axios.create({
@@ -76,7 +78,10 @@ const userSlice = createSlice({
     reducers: {
         setPage: (state, action) => {
             state.currentPage = action.payload;
-        }
+        },
+        setSelectedUser: (state, action) => {
+            state.selectedUser = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -111,8 +116,12 @@ const userSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchUserById.fulfilled, (state, action) => {
-                state.user = action.payload;
+                state.selectedUser = action.payload;
                 state.loading = false;
+
+                if (!state.users.find(user => user.id === action.payload.id)) {
+                    state.users.push(action.payload);
+                }
             })
             .addCase(fetchUserById.rejected, (state, action) => {
                 state.loading = false;
@@ -121,5 +130,5 @@ const userSlice = createSlice({
     },
 });
 
-export const {setPage} = userSlice.actions;
+export const {setPage, setSelectedUser } = userSlice.actions;
 export default userSlice.reducer;

@@ -1,25 +1,27 @@
 import  { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import { setSelectedRecipe } from "../redux/slices/recipeSlice";
+import {AppDispatch, RootState} from "../redux/store";
+import {fetchRecipeById, setSelectedRecipe} from "../redux/slices/recipeSlice";
 import {Link, useParams} from "react-router";
 
 export const RecipeDetailPage = () => {
     const { id } = useParams<{ id: string }>();
+    const dispatch = useDispatch<AppDispatch>();
+    console.log(id);
 
-    const dispatch = useDispatch();
-    const selectedRecipe = useSelector(
-        (state: RootState) => state.recipe.selectedRecipe
-    );
-    const recipes = useSelector((state: RootState) => state.recipe.recipes);
+    const { selectedRecipe, recipes, status } = useSelector((state: RootState) => state.recipe);
 
     useEffect(() => {
         const recipe = recipes.find((r) => r.id === Number(id));
         if (recipe) {
             dispatch(setSelectedRecipe(recipe));
+        } else {
+            dispatch(fetchRecipeById(Number(id)));
         }
     }, [dispatch, id, recipes]);
 
+    if (status === "loading") return <p>Завантаження...</p>;
+    if (status === "failed") return <p>Помилка при завантаженні рецепту.</p>;
     if (!selectedRecipe) return <p>Рецепт не знайдено</p>;
 
     console.log('selectedRecipe', selectedRecipe);
