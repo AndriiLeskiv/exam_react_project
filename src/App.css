@@ -131,26 +131,3 @@ div {
     margin-top: 20px;
     text-align: center;
 }
-
-/* Кнопки пагінації */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.pagination-container button {
-    margin: 0 5px;
-}
-
-/* Стилі для активної кнопки */
-.pagination-container button.active {
-    background-color: #0056b3;
-    color: #fff;
-    font-weight: bold;
-}
-
-.pagination-container button.active:hover {
-    background-color: #00408f;
-}

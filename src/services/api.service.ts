@@ -90,3 +90,21 @@ export const getRecipeByIdApi = async (id: number): Promise<IRecipes> => {
         throw new Error('Не вдалося отримати рецепт');
     }
 };
+
+export const getRecipesByTagApi = async (tag: string): Promise<{ recipes: IRecipes[], total: number }> => {
+    try {
+        const response = await axiosInstance.get(`/recipes/tag/${tag}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+        console.log('getRecipesByTagApi', response.data);
+        return {
+            recipes: response.data.recipes,
+            total: response.data.total,
+        };
+    } catch (error) {
+        console.log(error);
+        throw new Error(`Не вдалося отримати рецепти з тегом: ${tag}`);
+    }
+};

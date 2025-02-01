@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { IRecipes } from "../../models/recipes/IRecipes";
-import {getAllRecipesApi, getRecipeByIdApi} from "../../services/api.service.ts";
+import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
+import {IRecipes} from "../../models/recipes/IRecipes";
+import {getAllRecipesApi, getRecipeByIdApi, getRecipesByTagApi} from "../../services/api.service.ts";
 
 interface RecipesState {
     recipes: IRecipes[];
@@ -20,7 +20,7 @@ const initialState: RecipesState = {
 
 export const fetchRecipes = createAsyncThunk(
     "recipes/fetchRecipes",
-    async ({ page, limit }: { page: number, limit: number }) => {
+    async ({page, limit}: { page: number, limit: number }) => {
         return await getAllRecipesApi(page, limit);
     }
 );
@@ -37,6 +37,13 @@ export const fetchRecipesByUserId = createAsyncThunk(
     async (userId: number) => {
         const response = await getAllRecipesApi(1, 50);
         return response.recipes.filter(recipe => recipe.userId === userId);
+    }
+);
+
+export const fetchRecipesByTag = createAsyncThunk(
+    "recipes/fetchRecipesByTag",
+    async ({tag}: { tag: string }) => {
+        return await getRecipesByTagApi(tag);
     }
 );
 
@@ -75,8 +82,13 @@ const recipeSlice = createSlice({
                 state.status = "idle";
                 state.userRecipes = action.payload;
             })
+            .addCase(fetchRecipesByTag.fulfilled, (state, action) => {
+                state.status = "idle";
+                state.recipes = action.payload.recipes;
+                state.total = action.payload.total;
+            })
     },
 });
 
-export const { setSelectedRecipe } = recipeSlice.actions;
+export const {setSelectedRecipe} = recipeSlice.actions;
 export default recipeSlice.reducer;

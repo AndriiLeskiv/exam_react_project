@@ -4,6 +4,7 @@ import {fetchUsers, setPage} from "../redux/slices/userSlice.ts";
 import {UserCard} from "../components/user/UserCard.tsx";
 import {useLocation, useNavigate} from "react-router";
 import {useEffect} from "react";
+import {Pagination} from "../components/pagination/Pagination.tsx";
 
 export const UsersPage = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -48,33 +49,11 @@ export const UsersPage = () => {
                     <p>Немає користувачів</p>
                 )}
             </ul>
-
-            <div className="pagination-container">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Попередня
-                </button>
-
-                {Array.from({length: totalPages}, (_, index) => (
-                    <button
-                        key={index + 1}
-                        onClick={() => handlePageChange(index + 1)}
-                        disabled={currentPage === index + 1}
-                        className={currentPage === index + 1 ? 'active' : ''}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                >
-                    Наступна
-                </button>
-            </div>
+            <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+            />
         </div>
     );
 };
