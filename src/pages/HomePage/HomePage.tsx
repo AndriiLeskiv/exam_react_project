@@ -1,13 +1,14 @@
 import {Link} from "react-router";
 import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch, RootState} from "../redux/store.ts";
+import {AppDispatch, RootState} from "../../redux/store.ts";
 import {useEffect} from "react";
-import {fetchUser} from "../redux/slices/userSlice.ts";
+import {fetchUser} from "../../redux/slices/userSlice.ts";
+import './HomePage.css';
 
 export const HomePage = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-    const { firstName, image, loading, error } = useSelector((state: RootState) => state.user);
+    const {isAuthenticated} = useSelector((state: RootState) => state.auth);
+    const {firstName, image, loading, error} = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -27,7 +28,7 @@ export const HomePage = () => {
                 </div>
             ) : (
                 <div className="welcome-message">
-                    {image && <img src={image} alt="User Logo" className="user-logo" />}
+                    {image && <img src={image} alt="User Logo" className="user-logo"/>}
                     <p>Welcome back, dear {firstName ? firstName : " user"}! Enjoy browsing our content.</p>
                 </div>
             )}

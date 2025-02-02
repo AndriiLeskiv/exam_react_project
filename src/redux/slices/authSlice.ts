@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {loginApi, refreshTokenApi, logoutApi} from "../../services/api.service";
-import { retrieveLocalStorage } from "../../services/helpers.ts";
+import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
+import {loginApi, logoutApi} from "../../services/api.service";
+import {clearAuthData, retrieveLocalStorage, setTokenToStorage} from "../../services/helpers.ts";
 import {IUser} from "../../models/user/IUser.ts";
 
 interface AuthState {
@@ -21,16 +21,15 @@ const initialState: AuthState = {
     users: [],
 };
 
-// AsyncThunk для логіну
+// AsyncThunk for login
 export const login = createAsyncThunk(
     "auth/login",
-    async ({ username, password }: { username: string, password: string }, { rejectWithValue }) => {
+    async ({username, password}: { username: string, password: string }, {rejectWithValue}) => {
         try {
             const data = await loginApi(username, password);
 
-            localStorage.setItem("accessToken", data.accessToken);
-            localStorage.setItem("refreshToken", data.refreshToken);
-
+            setTokenToStorage("accessToken", data.accessToken);
+            setTokenToStorage("refreshToken", data.refreshToken);
             localStorage.setItem("user", JSON.stringify({
                 firstName: data.firstName,
                 image: data.image,
@@ -44,46 +43,20 @@ export const login = createAsyncThunk(
             };
         } catch (error: unknown) {
             if (error instanceof Error) {
-                return rejectWithValue(error.message || "Помилка авторизації");
+                return rejectWithValue(error.message || "Authorization error");
             }
-            return rejectWithValue("Помилка авторизації");
+            return rejectWithValue("Authorization error");
         }
     }
 );
 
-// AsyncThunk для оновлення токенів
-export const refreshToken = createAsyncThunk(
-    "auth/refreshToken",
-    async (_, { getState, rejectWithValue }) => {
-        try {
-            const state = getState() as { auth: AuthState };
-            if (!state.auth.refreshToken) {
-                return rejectWithValue("Refresh token не знайдено");
-            }
-
-            const data = await refreshTokenApi(state.auth.refreshToken);
-
-            localStorage.setItem("accessToken", data.accessToken);
-            localStorage.setItem("refreshToken", data.refreshToken);
-
-            return {
-                accessToken: data.accessToken,
-                refreshToken: data.refreshToken,
-            };
-        } catch (error) {
-            console.log(error);
-            return rejectWithValue("Не вдалося оновити токен");
-        }
-    }
-);
-
-// AsyncThunk для виходу
+// AsyncThunk for exit
 export const logout = createAsyncThunk("auth/logout", async () => {
     await logoutApi();
     return null;
 });
 
-// Оновлення в slice
+// Update in slice
 const authSlice = createSlice({
     name: "auth",
     initialState,
@@ -104,27 +77,11 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            .addCase(refreshToken.fulfilled, (state, action) => {
-                state.accessToken = action.payload.accessToken;
-                state.refreshToken = action.payload.refreshToken;
-                localStorage.setItem("accessToken", action.payload.accessToken);
-                localStorage.setItem("refreshToken", action.payload.refreshToken);
-            })
-            .addCase(refreshToken.rejected, (state, action) => {
-                state.error = action.payload as string;
-                state.isAuthenticated = false;
-                state.accessToken = null;
-                state.refreshToken = null;
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-            })
             .addCase(logout.fulfilled, (state) => {
                 state.accessToken = null;
                 state.refreshToken = null;
                 state.isAuthenticated = false;
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                localStorage.removeItem("user");
+                clearAuthData();
             })
 
     },

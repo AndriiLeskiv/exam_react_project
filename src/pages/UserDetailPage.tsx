@@ -2,38 +2,55 @@ import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router";
 import {AppDispatch, RootState} from "../redux/store.ts";
-import {fetchUserById} from "../redux/slices/userSlice.ts";
+import {fetchUserById, setSelectedUser} from "../redux/slices/userSlice.ts";
+import {fetchRecipesByUserId} from "../redux/slices/recipeSlice.ts";
 
 export const UserDetailPage = () => {
     const {id} = useParams<{ id: string }>();
-    console.log(id);
     const dispatch = useDispatch<AppDispatch>();
-    const {user, loading, error} = useSelector((state: RootState) => state.user);
+    const {users, selectedUser, loading, error} = useSelector((state: RootState) => state.user);
+    const {userRecipes} = useSelector((state: RootState) => state.recipe);
 
     useEffect(() => {
-        if (id) {
+        const user = users.find((u) => u.id === Number(id));
+        if (user) {
+            dispatch(setSelectedUser(user));
+        } else {
             dispatch(fetchUserById(Number(id)));
         }
-    }, [id, dispatch]);
+        dispatch(fetchRecipesByUserId(Number(id)));
+    }, [dispatch, id, users]);
 
-
-    if (loading) return <p>Завантаження...</p>;
-    if (error) return <p>Помилка: {error}</p>;
-    if (!user) return <p>Користувач не знайдений</p>;
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+    if (!selectedUser) return <p>User not found!</p>;
 
     return (
-        <div>
-            <h2>{user.firstName} {user.lastName}</h2>
-            <img src={user.image} alt={user.firstName} width="100"/>
-            <p>Email: {user.email}</p>
-            <p>Телефон: {user.phone}</p>
-            <p>Стать: {user.gender}</p>
-            <p>Дата народження: {user.birthDate}</p>
-            <p>Університет: {user.university}</p>
-            <p>Країна: {user.eyeColor}</p>
-            <p>Статус: {user.age}</p>
-            <p>Роль: {user.role}</p>
-            <p>IP користувача: {user.ip}</p>
+        <div className="details_result">
+            <h2>{selectedUser.firstName} {selectedUser.lastName}</h2>
+            <img src={selectedUser.image} alt={selectedUser.firstName} width="100"/>
+            <p>Email: {selectedUser.email}</p>
+            <p>Phone: {selectedUser.phone}</p>
+            <p>Gender: {selectedUser.gender}</p>
+            <p>Date of birth: {selectedUser.birthDate}</p>
+            <p>University: {selectedUser.university}</p>
+            <p>Country: {selectedUser.eyeColor}</p>
+            <p>Status: {selectedUser.age}</p>
+            <p>Role: {selectedUser.role}</p>
+            <p>User IP: {selectedUser.ip}</p>
+
+            <h3>User recipes:</h3>
+            {userRecipes.length > 0 ? (
+                <ul>
+                    {userRecipes.map((recipe) => (
+                        <li key={recipe.id}>
+                            <a href={`/recipes/${recipe.id}`}>{recipe.name}</a>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p>No recipes found.</p>
+            )}
         </div>
     );
 };

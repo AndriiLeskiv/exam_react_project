@@ -1,78 +1,73 @@
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState,} from "../redux/store";
-import {fetchRecipes} from "../redux/slices/recipeSlice";
-import {useLocation, useNavigate} from "react-router";
+import {fetchRecipes, fetchRecipesByTag, setPageRecipe} from "../redux/slices/recipeSlice";
+import {useNavigate, useSearchParams} from "react-router";
 import {RecipeList} from "../components/recipe/RecipeList.tsx";
+import {Pagination} from "../components/pagination/Pagination.tsx";
+import {SearchBar} from "../components/search/SearchBar.tsx";
 
 export const RecipesPage = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const location = useLocation();
-    const recipes = useSelector((state: RootState) => state.recipe.recipes);
-    const total = useSelector((state: RootState) => state.recipe.total);
-    const status = useSelector((state: RootState) => state.recipe.status);
+    const {recipes, total, currentPage, status} = useSelector((state: RootState) => state.recipe);
 
-    const recipesPerPage = 30;
-
-    const queryParams = new URLSearchParams(location.search);
-    const pageFromUrl = queryParams.get("page");
-    const page = pageFromUrl ? parseInt(pageFromUrl) : 1;
-
-    const [currentPage, setCurrentPage] = useState(page);
+    const [params] = useSearchParams();
+    const page = parseInt(params.get('page') ?? '1', 10);
+    const query = params.get('q') ?? '';
+    const tagFromUrl = params.get("tag");
 
     useEffect(() => {
-        dispatch(fetchRecipes({ page: currentPage, limit: recipesPerPage }));
-    }, [dispatch, currentPage]);
+        if (tagFromUrl) {
+            dispatch(fetchRecipesByTag({tag: tagFromUrl}));
+        } else {
+            dispatch(fetchRecipes({page, query}));
+        }
+        dispatch(setPageRecipe(page));
+    }, [dispatch, page, tagFromUrl, query]);
 
-    if (status === "loading") return <p>Завантаження...</p>;
-    if (status === "failed") return <p>Не вдалося отримати рецепти</p>;
+    if (status === "loading") return <p>Loading...</p>;
+    if (status === "failed") return <p>Failed to get recipes</p>;
 
-    const totalPages = Math.ceil(total / recipesPerPage);
+    const totalPages = Math.ceil(total / 30);
 
     const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        navigate(`?page=${page}`);
+        dispatch(setPageRecipe(page));
+        if (query != '') {
+            navigate(`?page=${page}${query ? `&q=${query}` : ''}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
+        } else {
+            navigate(`?page=${page}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
+        }
+    };
+
+    const hendleSendRecipe = (query: string) => {
+        if (query !== '') {
+            navigate(`?page=1&q=${query}`);
+        } else {
+            navigate(`?page=1`);
+        }
     };
 
     return (
         <div>
-            <h1>Список рецептів</h1>
+            <h1>Recipe list</h1>
+            <SearchBar searchType="recipes" onSearch={hendleSendRecipe} search={query}/>
             <ul className="recipe-list">
-                {recipes.map((recipe) => (
-                    <li key={recipe.id} className="recipe-item">
-                        <RecipeList recipe={recipe} />
-                    </li>
-                ))}
+                {recipes.length > 0 ? (
+                    recipes.map((recipe) => (
+                        <li key={recipe.id} className="recipe-item">
+                            <RecipeList recipe={recipe}/>
+                        </li>
+                    ))
+                ) : (
+                    <p>No recipes</p>
+                )}
             </ul>
-            {totalPages > 1 && (
-                <div className="pagination-container">
-                    <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        Попередня
-                    </button>
-
-                    {Array.from({ length: totalPages }, (_, index) => (
-                        <button
-                            key={index + 1}
-                            onClick={() => handlePageChange(index + 1)}
-                            disabled={currentPage === index + 1}
-                            className={currentPage === index + 1 ? 'active' : ''}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
-
-                    <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        Наступна
-                    </button>
-                </div>
-            )}
+            <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+            />
         </div>
     );
 };

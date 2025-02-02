@@ -1,0 +1,12 @@
+.home-page {
+    padding: 20px;
+    text-align: center;
+}
+
+.welcome-message {
+    background-color: #e1f7d5;
+    padding: 15px;
+    border-radius: 8px;
+    color: #333;
+    font-size: 1.2rem;
+}
