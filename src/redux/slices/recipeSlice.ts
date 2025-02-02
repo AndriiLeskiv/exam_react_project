@@ -20,22 +20,24 @@ const initialState: RecipesState = {
     status: "idle",
 };
 
+// Fetches a list of recipes based on the query string and page number
 export const fetchRecipes = createAsyncThunk<
     { recipes: IRecipes[]; total: number },
-    { query: string, page: number},
+    { query: string, page: number },
     { rejectValue: string }
 >(
     "recipes/fetchRecipes",
-    async ({ page, query }, { rejectWithValue }) => {
+    async ({page, query}, {rejectWithValue}) => {
         try {
             return await getAllRecipesApi(page, query);
         } catch (error) {
             console.log(error);
-            return rejectWithValue("Не вдалося отримати список рецептів");
+            return rejectWithValue("Failed to get recipe list");
         }
     }
 );
 
+// Fetches a single recipe by its ID
 export const fetchRecipeById = createAsyncThunk(
     "recipes/fetchRecipeById",
     async (id: number) => {
@@ -43,16 +45,16 @@ export const fetchRecipeById = createAsyncThunk(
     }
 );
 
+// Fetches recipes created by a specific user based on their user ID
 export const fetchRecipesByUserId = createAsyncThunk(
     "recipes/fetchRecipesByUserId",
     async (userId: number) => {
-        // return await getUserByIdApi(userId);
         const response = await getAllRecipesApi(1, '');
-        console.log('response1', response);
         return response.recipes.filter(recipe => recipe.userId === userId);
     }
 );
 
+// Fetches recipes by a specific tag
 export const fetchRecipesByTag = createAsyncThunk(
     "recipes/fetchRecipesByTag",
     async ({tag}: { tag: string }) => {

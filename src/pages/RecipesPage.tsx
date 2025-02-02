@@ -22,21 +22,20 @@ export const RecipesPage = () => {
             dispatch(fetchRecipesByTag({tag: tagFromUrl}));
         } else {
             dispatch(fetchRecipes({page, query}));
-            dispatch(setPageRecipe(page));
         }
+        dispatch(setPageRecipe(page));
     }, [dispatch, page, tagFromUrl, query]);
 
-    if (status === "loading") return <p>Завантаження...</p>;
-    if (status === "failed") return <p>Не вдалося отримати рецепти</p>;
+    if (status === "loading") return <p>Loading...</p>;
+    if (status === "failed") return <p>Failed to get recipes</p>;
 
     const totalPages = Math.ceil(total / 30);
 
     const handlePageChange = (page: number) => {
         dispatch(setPageRecipe(page));
-        if(query != ''){
+        if (query != '') {
             navigate(`?page=${page}${query ? `&q=${query}` : ''}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
-
-        }else {
+        } else {
             navigate(`?page=${page}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
         }
     };
@@ -51,17 +50,17 @@ export const RecipesPage = () => {
 
     return (
         <div>
-            <h1>Список рецептів</h1>
+            <h1>Recipe list</h1>
             <SearchBar searchType="recipes" onSearch={hendleSendRecipe} search={query}/>
             <ul className="recipe-list">
-                { recipes.length > 0 ? (
+                {recipes.length > 0 ? (
                     recipes.map((recipe) => (
                         <li key={recipe.id} className="recipe-item">
                             <RecipeList recipe={recipe}/>
                         </li>
                     ))
                 ) : (
-                    <p>Немає рецептів</p>
+                    <p>No recipes</p>
                 )}
             </ul>
             <Pagination

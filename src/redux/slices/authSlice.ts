@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
 import {loginApi, logoutApi} from "../../services/api.service";
 import {clearAuthData, retrieveLocalStorage, setTokenToStorage} from "../../services/helpers.ts";
 import {IUser} from "../../models/user/IUser.ts";
@@ -21,10 +21,10 @@ const initialState: AuthState = {
     users: [],
 };
 
-// AsyncThunk для логіну
+// AsyncThunk for login
 export const login = createAsyncThunk(
     "auth/login",
-    async ({ username, password }: { username: string, password: string }, { rejectWithValue }) => {
+    async ({username, password}: { username: string, password: string }, {rejectWithValue}) => {
         try {
             const data = await loginApi(username, password);
 
@@ -43,20 +43,20 @@ export const login = createAsyncThunk(
             };
         } catch (error: unknown) {
             if (error instanceof Error) {
-                return rejectWithValue(error.message || "Помилка авторизації");
+                return rejectWithValue(error.message || "Authorization error");
             }
-            return rejectWithValue("Помилка авторизації");
+            return rejectWithValue("Authorization error");
         }
     }
 );
 
-// AsyncThunk для виходу
+// AsyncThunk for exit
 export const logout = createAsyncThunk("auth/logout", async () => {
     await logoutApi();
     return null;
 });
 
-// Оновлення в slice
+// Update in slice
 const authSlice = createSlice({
     name: "auth",
     initialState,

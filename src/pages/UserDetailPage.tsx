@@ -3,14 +3,13 @@ import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router";
 import {AppDispatch, RootState} from "../redux/store.ts";
 import {fetchUserById, setSelectedUser} from "../redux/slices/userSlice.ts";
-import {fetchRecipesByUserId } from "../redux/slices/recipeSlice.ts";
+import {fetchRecipesByUserId} from "../redux/slices/recipeSlice.ts";
 
 export const UserDetailPage = () => {
     const {id} = useParams<{ id: string }>();
-    console.log(id);
     const dispatch = useDispatch<AppDispatch>();
-    const { users, selectedUser, loading, error } = useSelector((state: RootState) => state.user);
-    const { userRecipes} = useSelector((state: RootState) => state.recipe);
+    const {users, selectedUser, loading, error} = useSelector((state: RootState) => state.user);
+    const {userRecipes} = useSelector((state: RootState) => state.recipe);
 
     useEffect(() => {
         const user = users.find((u) => u.id === Number(id));
@@ -22,25 +21,25 @@ export const UserDetailPage = () => {
         dispatch(fetchRecipesByUserId(Number(id)));
     }, [dispatch, id, users]);
 
-    if (loading) return <p>Завантаження...</p>;
-    if (error) return <p>Помилка: {error}</p>;
-    if (!selectedUser) return <p>Користувач не знайдений</p>;
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+    if (!selectedUser) return <p>User not found!</p>;
 
     return (
-        <div>
+        <div className="details_result">
             <h2>{selectedUser.firstName} {selectedUser.lastName}</h2>
             <img src={selectedUser.image} alt={selectedUser.firstName} width="100"/>
             <p>Email: {selectedUser.email}</p>
-            <p>Телефон: {selectedUser.phone}</p>
-            <p>Стать: {selectedUser.gender}</p>
-            <p>Дата народження: {selectedUser.birthDate}</p>
-            <p>Університет: {selectedUser.university}</p>
-            <p>Країна: {selectedUser.eyeColor}</p>
-            <p>Статус: {selectedUser.age}</p>
-            <p>Роль: {selectedUser.role}</p>
-            <p>IP користувача: {selectedUser.ip}</p>
+            <p>Phone: {selectedUser.phone}</p>
+            <p>Gender: {selectedUser.gender}</p>
+            <p>Date of birth: {selectedUser.birthDate}</p>
+            <p>University: {selectedUser.university}</p>
+            <p>Country: {selectedUser.eyeColor}</p>
+            <p>Status: {selectedUser.age}</p>
+            <p>Role: {selectedUser.role}</p>
+            <p>User IP: {selectedUser.ip}</p>
 
-            <h3>Рецепти користувача:</h3>
+            <h3>User recipes:</h3>
             {userRecipes.length > 0 ? (
                 <ul>
                     {userRecipes.map((recipe) => (
@@ -50,7 +49,7 @@ export const UserDetailPage = () => {
                     ))}
                 </ul>
             ) : (
-                <p>Рецепти не знайдено.</p>
+                <p>No recipes found.</p>
             )}
         </div>
     );

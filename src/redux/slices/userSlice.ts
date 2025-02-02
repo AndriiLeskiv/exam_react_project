@@ -26,44 +26,45 @@ const initialState: UserState = {
     selectedUser: null,
 };
 
+// Fetches a list of users based on the query string and page number
 export const fetchUsers = createAsyncThunk<
     { users: IUser[]; total: number },
-    { query: string, page: number},
+    { query: string, page: number },
     { rejectValue: string }
 >(
     "user/fetchUsers",
-    async ({ page, query }, { rejectWithValue }) => {
+    async ({page, query}, {rejectWithValue}) => {
         try {
             const data = await getUsersApi(page, query);
-            return { users: data.users, total: data.total };
+            return {users: data.users, total: data.total};
         } catch (error) {
             console.log(error);
-            return rejectWithValue("Не вдалося отримати список користувачів");
+            return rejectWithValue("Failed to get user list");
         }
     }
 );
 
+// Fetches the currently authenticated user's data
 export const fetchUser = createAsyncThunk<IUser, void, { rejectValue: string }>(
     "user/fetchUser",
-    async (_, { getState, rejectWithValue }) => {
+    async (_, {getState, rejectWithValue}) => {
         const state = getState() as { auth: { accessToken: string | null } };
         const accessToken = state.auth.accessToken;
 
         if (!accessToken) {
-            return rejectWithValue("Користувач не авторизований");
+            return rejectWithValue("User is not authorized.");
         }
 
         try {
-            const user = await fetchUserData(accessToken);
-            console.log('user', user);
-            return user;
+            return await fetchUserData(accessToken);
         } catch (error) {
             console.error("Error in fetchUser:", error);
-            return rejectWithValue("Не вдалося отримати дані користувача");
+            return rejectWithValue("Failed to retrieve user data");
         }
     }
 );
 
+// Fetches a specific user by their ID
 export const fetchUserById = createAsyncThunk("user/fetchUserById", async (id: number) => {
     return await getUserByIdApi(id);
 });
@@ -126,5 +127,5 @@ const userSlice = createSlice({
     },
 });
 
-export const {setPage, setSelectedUser } = userSlice.actions;
+export const {setPage, setSelectedUser} = userSlice.actions;
 export default userSlice.reducer;

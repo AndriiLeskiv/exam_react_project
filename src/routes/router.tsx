@@ -1,11 +1,11 @@
 import {createBrowserRouter} from "react-router";
 import App from "../App.tsx";
-import {AuthPage} from "../pages/AuthPage.tsx";
+import {AuthPage} from "../pages/AuthPage/AuthPage.tsx";
 import {UsersPage} from "../pages/UsersPage.tsx";
 import {UserDetailPage} from "../pages/UserDetailPage.tsx";
 import {RecipesPage} from "../pages/RecipesPage.tsx";
 import {RecipeDetailPage} from "../pages/RecipeDetailPage.tsx";
-import {HomePage} from "../pages/HomePage.tsx";
+import {HomePage} from "../pages/HomePage/HomePage.tsx";
 
 export const routes = createBrowserRouter([
     {

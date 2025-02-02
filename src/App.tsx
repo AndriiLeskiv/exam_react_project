@@ -4,12 +4,12 @@ import {Menu} from "./components/menu/Menu.tsx";
 
 function App() {
 
-  return (
-    <>
-      <Menu/>
-      <Outlet/>
-    </>
-  )
+    return (
+        <>
+            <Menu/>
+            <Outlet/>
+        </>
+    )
 }
 
 export default App

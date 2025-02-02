@@ -7,7 +7,7 @@ interface PaginationProps {
     onPageChange: (page: number) => void;
 }
 
-export const Pagination:FC<PaginationProps>  = ({ totalPages, currentPage, onPageChange }) => {
+export const Pagination: FC<PaginationProps> = ({totalPages, currentPage, onPageChange}) => {
     if (totalPages <= 1) return null;
 
     return (
@@ -16,10 +16,10 @@ export const Pagination:FC<PaginationProps>  = ({ totalPages, currentPage, onPag
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
             >
-                Попередня
+                Previous
             </button>
 
-            {Array.from({ length: totalPages }, (_, index) => (
+            {Array.from({length: totalPages}, (_, index) => (
                 <button
                     key={index + 1}
                     onClick={() => onPageChange(index + 1)}
@@ -34,7 +34,7 @@ export const Pagination:FC<PaginationProps>  = ({ totalPages, currentPage, onPag
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
             >
-                Наступна
+                Next
             </button>
         </div>
     );

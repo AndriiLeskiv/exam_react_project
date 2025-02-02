@@ -1,10 +1,11 @@
 import React, {useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {login} from "../redux/slices/authSlice.ts";
-import {fetchUser} from "../redux/slices/userSlice.ts";
-import {RootState} from "../redux/store.ts";
-import {AppDispatch} from "../redux/store.ts";
+import {login} from "../../redux/slices/authSlice.ts";
+import {fetchUser} from "../../redux/slices/userSlice.ts";
+import {RootState} from "../../redux/store.ts";
+import {AppDispatch} from "../../redux/store.ts";
 import {useNavigate} from "react-router";
+import './AuthPage.css';
 
 export const AuthPage = () => {
     const [username, setUsername] = useState("");
@@ -19,39 +20,38 @@ export const AuthPage = () => {
         e.preventDefault();
         try {
             const loginResult = await dispatch(login({username, password})).unwrap();
-            console.log('loginResult', loginResult)
             if (loginResult.accessToken) {
                 await dispatch(fetchUser()).unwrap();
                 navigate('/');
             }
         } catch (err) {
-            console.error("Помилка авторизації:", err);
+            console.error("Authorization error:", err);
         }
     };
 
     return (
         <div className="auth-page">
-            <h2>Авторизація</h2>
+            <h2>Authorization</h2>
             {isAuthenticated ? (
-                <p>Ви вже авторизовані!</p>
+                <p>You are already logged in!</p>
             ) : (
                 <form onSubmit={handleLogin}>
                     <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Логін"
+                        placeholder="Login"
                         required
                     />
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Пароль"
+                        placeholder="Password"
                         required
                     />
                     <button type="submit" disabled={loading}>
-                        {loading ? "Завантаження..." : "Увійти"}
+                        {loading ? "Loading..." : "Log in"}
                     </button>
                 </form>
             )}

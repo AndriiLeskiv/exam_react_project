@@ -10,17 +10,17 @@ export const retrieveLocalStorage = <T>(key: string): T | null => {
     }
 };
 
-// Збереження токенів у localStorage
+// Save tokens in localStorage
 export const setTokenToStorage = (key: string, token: string) => {
     localStorage.setItem(key, token);
 };
 
-// Видалення токенів з localStorage
+// Removing tokens from localStorage
 export const removeTokenFromStorage = (key: string) => {
     localStorage.removeItem(key);
 };
 
-// Додаткова функція для видалення всіх даних, пов'язаних з авторизацією
+// Additional function to delete all data related to authorization
 export const clearAuthData = (): void => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");

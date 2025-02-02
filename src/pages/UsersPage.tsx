@@ -2,7 +2,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../redux/store.ts";
 import {fetchUsers, setPage} from "../redux/slices/userSlice.ts";
 import {UserList} from "../components/user/UserList.tsx";
-import { useNavigate, useSearchParams} from "react-router";
+import {useNavigate, useSearchParams} from "react-router";
 import {useEffect} from "react";
 import {Pagination} from "../components/pagination/Pagination.tsx";
 import {SearchBar} from "../components/search/SearchBar.tsx";
@@ -30,40 +30,40 @@ export const UsersPage = () => {
 
     const handlePageChange = (page: number) => {
         dispatch(setPage(page));
-        if(query != ''){
+        if (query != '') {
             navigate(`?page=${page}&q=${query}`);
-        }else {
+        } else {
             navigate(`?page=${page}`);
         }
     };
 
-    const searchUser = (page: number, query:string)=>{
-        dispatch(fetchUsers({ page, query }));
+    const searchUser = (page: number, query: string) => {
+        dispatch(fetchUsers({page, query}));
     }
 
-    const handleSendUser = (query:string)=>{
-        if(query != ''){
+    const handleSendUser = (query: string) => {
+        if (query != '') {
             navigate(`?page=1&q=${query}`);
-        }else {
+        } else {
             navigate(`?page=1`);
         }
     }
 
     return (
         <div>
-            <h1>Список користувачів</h1>
-            <SearchBar searchType="users" onSearch={handleSendUser} search={query} />
+            <h1>User list</h1>
+            <SearchBar searchType="users" onSearch={handleSendUser} search={query}/>
             <ul>
                 {loading ? (
-                    <p>Завантаження...</p>
+                    <p>Loading...</p>
                 ) : users.length > 0 ? (
                     users.map((user) => (
                         <li key={user.id}>
-                            <UserList user={user} />
+                            <UserList user={user}/>
                         </li>
                     ))
                 ) : (
-                    <p>Немає користувачів</p>
+                    <p>No users</p>
                 )}
             </ul>
             <Pagination

@@ -1,16 +1,18 @@
 import "./Menu.css"
 import {AppDispatch, RootState} from "../../redux/store.ts";
 import {useDispatch, useSelector} from "react-redux";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
 import {logout} from "../../redux/slices/authSlice.ts";
 
 export const Menu = () => {
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     const { firstName, image } = useSelector((state: RootState) => state.user);
     const dispatch = useDispatch<AppDispatch>()
+    const navigate = useNavigate();
 
     const handleLogout = () => {
         dispatch(logout());
+        navigate("/");
     };
 
     return (
