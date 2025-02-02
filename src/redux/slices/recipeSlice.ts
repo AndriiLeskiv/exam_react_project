@@ -1,4 +1,4 @@
-import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {IRecipes} from "../../models/recipes/IRecipes";
 import {getAllRecipesApi, getRecipeByIdApi, getRecipesByTagApi} from "../../services/api.service.ts";
 
@@ -6,6 +6,7 @@ interface RecipesState {
     recipes: IRecipes[];
     userRecipes: IRecipes[];
     total: number;
+    currentPage: number;
     selectedRecipe: IRecipes | null;
     status: "idle" | "loading" | "failed";
 }
@@ -14,14 +15,24 @@ const initialState: RecipesState = {
     recipes: [],
     userRecipes: [],
     total: 0,
+    currentPage: 1,
     selectedRecipe: null,
     status: "idle",
 };
 
-export const fetchRecipes = createAsyncThunk(
+export const fetchRecipes = createAsyncThunk<
+    { recipes: IRecipes[]; total: number },
+    { query: string, page: number},
+    { rejectValue: string }
+>(
     "recipes/fetchRecipes",
-    async ({page, limit}: { page: number, limit: number }) => {
-        return await getAllRecipesApi(page, limit);
+    async ({ page, query }, { rejectWithValue }) => {
+        try {
+            return await getAllRecipesApi(page, query);
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue("Не вдалося отримати список рецептів");
+        }
     }
 );
 
@@ -35,7 +46,9 @@ export const fetchRecipeById = createAsyncThunk(
 export const fetchRecipesByUserId = createAsyncThunk(
     "recipes/fetchRecipesByUserId",
     async (userId: number) => {
-        const response = await getAllRecipesApi(1, 50);
+        // return await getUserByIdApi(userId);
+        const response = await getAllRecipesApi(1, '');
+        console.log('response1', response);
         return response.recipes.filter(recipe => recipe.userId === userId);
     }
 );
@@ -51,6 +64,9 @@ const recipeSlice = createSlice({
     name: "recipes",
     initialState,
     reducers: {
+        setPageRecipe: (state, action) => {
+            state.currentPage = action.payload;
+        },
         setSelectedRecipe(state, action) {
             state.selectedRecipe = action.payload;
         },
@@ -90,5 +106,5 @@ const recipeSlice = createSlice({
     },
 });
 
-export const {setSelectedRecipe} = recipeSlice.actions;
+export const {setPageRecipe, setSelectedRecipe} = recipeSlice.actions;
 export default recipeSlice.reducer;

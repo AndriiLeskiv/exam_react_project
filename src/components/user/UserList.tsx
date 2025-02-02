@@ -1,13 +1,13 @@
 import React from "react";
 import {IUser} from "../../models/user/IUser.ts";
 import {Link} from "react-router";
-import "./UserCard.css";
+import "./UserList.css";
 
 interface UserCardProps {
     user: IUser;
 }
 
-export const UserCard: React.FC<UserCardProps> = ({ user }) => {
+export const UserList: React.FC<UserCardProps> = ({ user }) => {
     return (
         <div className="user-card">
             <img src={user.image} alt={user.firstName} width="50" />

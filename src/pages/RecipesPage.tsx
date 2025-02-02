@@ -1,8 +1,8 @@
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState,} from "../redux/store";
-import {fetchRecipes, fetchRecipesByTag} from "../redux/slices/recipeSlice";
-import {useLocation, useNavigate} from "react-router";
+import {fetchRecipes, fetchRecipesByTag, setPageRecipe} from "../redux/slices/recipeSlice";
+import {useNavigate, useSearchParams} from "react-router";
 import {RecipeList} from "../components/recipe/RecipeList.tsx";
 import {Pagination} from "../components/pagination/Pagination.tsx";
 import {SearchBar} from "../components/search/SearchBar.tsx";
@@ -10,45 +10,59 @@ import {SearchBar} from "../components/search/SearchBar.tsx";
 export const RecipesPage = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const location = useLocation();
-    const recipes = useSelector((state: RootState) => state.recipe.recipes);
-    const total = useSelector((state: RootState) => state.recipe.total);
-    const status = useSelector((state: RootState) => state.recipe.status);
-    const recipesPerPage = 30;
-    const queryParams = new URLSearchParams(location.search);
-    const pageFromUrl = queryParams.get("page");
-    const tagFromUrl = queryParams.get("tag");
-    const page = pageFromUrl ? parseInt(pageFromUrl) : 1;
-    const [currentPage, setCurrentPage] = useState(page);
+    const {recipes, total, currentPage, status} = useSelector((state: RootState) => state.recipe);
+
+    const [params] = useSearchParams();
+    const page = parseInt(params.get('page') ?? '1', 10);
+    const query = params.get('q') ?? '';
+    const tagFromUrl = params.get("tag");
 
     useEffect(() => {
         if (tagFromUrl) {
             dispatch(fetchRecipesByTag({tag: tagFromUrl}));
         } else {
-            dispatch(fetchRecipes({page: currentPage, limit: recipesPerPage}));
+            dispatch(fetchRecipes({page, query}));
+            dispatch(setPageRecipe(page));
         }
-    }, [dispatch, currentPage, tagFromUrl]);
+    }, [dispatch, page, tagFromUrl, query]);
 
     if (status === "loading") return <p>Завантаження...</p>;
     if (status === "failed") return <p>Не вдалося отримати рецепти</p>;
 
-    const totalPages = Math.ceil(total / recipesPerPage);
+    const totalPages = Math.ceil(total / 30);
 
     const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        navigate(`?page=${page}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
+        dispatch(setPageRecipe(page));
+        if(query != ''){
+            navigate(`?page=${page}${query ? `&q=${query}` : ''}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
+
+        }else {
+            navigate(`?page=${page}${tagFromUrl ? `&tag=${tagFromUrl}` : ''}`);
+        }
+    };
+
+    const hendleSendRecipe = (query: string) => {
+        if (query !== '') {
+            navigate(`?page=1&q=${query}`);
+        } else {
+            navigate(`?page=1`);
+        }
     };
 
     return (
         <div>
             <h1>Список рецептів</h1>
-            <SearchBar searchType="recipes"/>
+            <SearchBar searchType="recipes" onSearch={hendleSendRecipe} search={query}/>
             <ul className="recipe-list">
-                {recipes.map((recipe) => (
-                    <li key={recipe.id} className="recipe-item">
-                        <RecipeList recipe={recipe}/>
-                    </li>
-                ))}
+                { recipes.length > 0 ? (
+                    recipes.map((recipe) => (
+                        <li key={recipe.id} className="recipe-item">
+                            <RecipeList recipe={recipe}/>
+                        </li>
+                    ))
+                ) : (
+                    <p>Немає рецептів</p>
+                )}
             </ul>
             <Pagination
                 totalPages={totalPages}

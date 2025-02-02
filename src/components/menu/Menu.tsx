@@ -33,7 +33,6 @@ export const Menu = () => {
                 ) : (
                     <li><Link to="/login">Login</Link></li>
                 )}
-                <li><Link to="/search">Search</Link></li>
             </ul>
         </nav>
     );

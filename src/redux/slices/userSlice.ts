@@ -28,13 +28,13 @@ const initialState: UserState = {
 
 export const fetchUsers = createAsyncThunk<
     { users: IUser[]; total: number },
-    { page: number },
+    { query: string, page: number},
     { rejectValue: string }
 >(
     "user/fetchUsers",
-    async ({ page }, { rejectWithValue }) => {
+    async ({ page, query }, { rejectWithValue }) => {
         try {
-            const data = await getUsersApi(page);
+            const data = await getUsersApi(page, query);
             return { users: data.users, total: data.total };
         } catch (error) {
             console.log(error);

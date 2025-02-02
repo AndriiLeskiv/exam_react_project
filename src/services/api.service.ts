@@ -33,10 +33,10 @@ export const logoutApi = async (): Promise<void> => {
 };
 
 // Отримання користувачів
-export const getUsersApi = async (page: number) => {
+export const getUsersApi = async (page: number, query:string) => {
     const limit = 30;
     const skip = (page - 1) * limit;
-    return fetchData("/users", { limit, skip });
+    return fetchData(`/users/search?q=${query}`, { limit, skip });
 };
 
 // Отримання користувача за ID
@@ -45,10 +45,10 @@ export const getUserByIdApi = async (id: number) => {
 };
 
 // Отримання рецептів
-export const getAllRecipesApi = async (page: number, limit: number): Promise<{ recipes: IRecipes[], total: number }> => {
+export const getAllRecipesApi = async (page: number, query: string): Promise<{ recipes: IRecipes[], total: number }> => {
+    const limit = 30;
     const skip = (page - 1) * limit;
-    const data = await fetchData("/recipes", { limit, skip });
-    return { recipes: data.recipes, total: data.total };
+    return await fetchData(`/recipes/search?q=${query}`, { limit, skip });
 };
 
 export const getRecipeByIdApi = async (id: number): Promise<IRecipes> => {
@@ -63,10 +63,4 @@ export const getRecipesByTagApi = async (tag: string): Promise<{ recipes: IRecip
 // Отримання даних користувача
 export const fetchUserData = async (accessToken: string): Promise<IUser> => {
     return fetchData("/me", { accessToken });
-};
-
-// Пошук елементів
-export const searchItemsApi = async ({ query, type }: { query: string, type: "recipes" | "users" }) => {
-    const data = await fetchData(`${type}/search`, { q: query });
-    return type === "recipes" ? data.recipes : data.users;
 };
