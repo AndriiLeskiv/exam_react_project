@@ -60,4 +60,4 @@ This project is a web application that allows users to log in and browse through
    ```bash
    git clone https://github.com/AndriiLeskiv/exam_react_project.git
 
-Created by Andrii Leskiv
+Created by: Andrii Leskiv
